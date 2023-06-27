@@ -1,12 +1,10 @@
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.io.*;
 
 public class Main {
-    static int n, m;
+
+    static int n, s;
     static int[] arr;
 
     public static void main(String[] args) throws IOException {
@@ -15,30 +13,40 @@ public class Main {
         StringTokenizer st = new StringTokenizer(str, " ");
 
         n = Integer.parseInt(st.nextToken());
-        m = Integer.parseInt(st.nextToken());
-        arr = new int[n+1];
+        s = Integer.parseInt(st.nextToken());
+        arr = new int[n];
 
         str = br.readLine();
         st = new StringTokenizer(str, " ");
-        for(int i = 0; i < n; i++) arr[i] = Integer.parseInt(st.nextToken());
-//        System.out.println(Arrays.toString(arr));
 
-        int start = 0;
-        int end = 0;
-        int sum = 0;
-        int min = Integer.MAX_VALUE;
-
-        while(end <= n) {
-            if(sum >= m) {
-                sum -= arr[start++];
-                int cnt = end - start + 1;
-                min = Math.min(min, cnt);
-            }else if(sum < m) {
-                sum += arr[end++];
-            }
+        for(int i = 0; i < n; i++){
+            arr[i] = Integer.parseInt(st.nextToken());
         }
 
-        if(min == Integer.MAX_VALUE) System.out.println(0);
-        else System.out.println(min);
+        int cnt = Integer.MAX_VALUE;
+        int left = 0;
+        int sum = 0;
+
+        // 마지막 비교를 위해 n까지
+        for(int right = 0; right <= n; right++){
+            if(left > right) continue;
+
+            if(sum >= s) {
+                sum -= arr[left];
+                left++;
+                cnt = Math.min(cnt, right-left+1);
+
+                right--;
+            }
+            else {
+                if(right == n) break;
+                sum += arr[right];
+            }
+
+//            System.out.println(sum);
+        }
+
+        if(cnt == Integer.MAX_VALUE) cnt = 0;
+        System.out.println(cnt);
     }
 }
