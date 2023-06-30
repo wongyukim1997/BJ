@@ -6,18 +6,16 @@ public class Main {
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String str = br.readLine();
-        List<Long> list = new ArrayList<>();
+        List<Integer> list = new ArrayList<>();
 
         int g = Integer.parseInt(str);
 
-        long start = 1;
-        long end = 2;
+        int start = 1;
+        int end = 2;
 
 
         while(end <= 100000){
-            long now = end*end;
-            long memory = start*start;
-            long isG = now - memory;
+            int isG = end*end - start*start;
 
             if(isG > g){
                 start++;
@@ -27,7 +25,7 @@ public class Main {
             }
         }
 
-        if(list.size() == 0) list.add(-1L);
-        for(long i : list) System.out.println(i);
+        if(list.size() == 0) list.add(-1);
+        for(int i : list) System.out.println(i);
     }
 }
