@@ -1,13 +1,10 @@
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
+import java.io.*;
 
 public class Main {
 
-    static int n, max = 0, c = 0;
-    static int[][] map, copy;
+    static int n, max = 0;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -15,7 +12,7 @@ public class Main {
         StringTokenizer st;
 
         n = Integer.parseInt(str);
-        map = new int[n][n];
+        int[][] map = new int[n][n];
 
         for(int i = 0; i < n; i++){
             str = br.readLine();
@@ -25,240 +22,191 @@ public class Main {
             }
         }
 
-        com(0, new int[5]);
+        dfs(0, map);
         System.out.println(max);
     }
 
-    static void com(int cnt, int[] arr){
-        if(cnt == 5){
-            move(arr);
+    static void dfs(int num, int[][] map){
+        if(num == 5){
+            check(map);
             return;
         }
 
-        for(int i = 0; i < 4; i++){
-            arr[cnt] = i;
-            com(cnt+1, arr);
-        }
-    }
-
-    static void initCopy(){
-        copy = new int[n][n];
-
+        int[][] temp = new int[n][n];
         for(int i = 0; i < n; i++){
-            for(int j = 0; j < n; j++){
-                copy[i][j] = map[i][j];
-            }
+            for(int j = 0; j < n; j++) temp[i][j] = map[i][j];
         }
-    }
-
-    static void move(int[] arr){
-        initCopy();
-
-//        for(int i = 0; i < n; i++){
-//            for(int j = 0; j < n; j++){
-//                System.out.print(copy[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println(Arrays.toString(arr));
-        for(int i = 0; i < 5; i++){
-            if(arr[i] == 0){
-                copy = sumUp(copy);
-            }else if(arr[i] == 1){
-                copy = sumDown(copy);
-            }else if(arr[i] == 2){
-                copy = sumLeft(copy);
-            }else if(arr[i] == 3){
-                copy = sumRight(copy);
+        
+        for(int k = 0; k < 4; k++) {
+            temp = move(k, temp);
+            dfs(num+1, temp);
+            
+            for(int i = 0; i < n; i++){
+                for(int j = 0; j < n; j++) temp[i][j] = map[i][j];
             }
         }
 
-        max = Math.max(max, findMax(copy));
     }
 
-    //위로 합칠 경우
-    static int[][] sumUp(int[][] map){
+    static int[][] move(int d, int[][] map){
         boolean[][] visit = new boolean[n][n];
 
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < n; j++){
-                if(map[j][i] != 0){
-                    for(int k = j-1; k >= 0; k--){
-                        if(map[k][i] != 0 && !visit[k][i] && map[k][i] == map[j][i]){
-//                            System.out.println(1);
-                            map[k][i] = map[k][i] * 2;
-                            map[j][i] = 0;
-                            visit[k][i] = true;
-                            break;
-                        }
-                        else if(map[k][i] != 0 && visit[k][i]) {
-//                            System.out.println(2);
-                            int temp = map[j][i];
-                            map[k+1][i] = temp;
-                            map[j][i] = 0;
-                            break;
-                        }
-                        else if(map[k][i] != 0 && map[k][i] != map[j][i]){
-//                            System.out.println(3);
-                            int temp = map[j][i];
-                            map[j][i] = 0;
-                            map[k+1][i] = temp;
-                            break;
-                        }
-                        else if(k == 0 && map[k][i] == 0){
-//                            System.out.println(4);
-                            map[k][i] = map[j][i];
-                            map[j][i] = 0;
-                            break;
+        // 아래
+        if(d == 0){
+            for(int i = 0; i < n; i++){
+                for(int j = n-1; j >= 0; j--){
+                    if(map[j][i] != 0){
+                        for(int k = j+1; k < n; k++){
+                            if(map[k][i] != 0 && !visit[k][i] && map[k][i] == map[j][i]){
+                                map[k][i] = map[k][i] * 2;
+                                map[j][i] = 0;
+                                visit[k][i] = true;
+                                break;
+                            }
+                            else if(map[k][i] != 0 && visit[k][i]) {
+                                int temp = map[j][i];
+                                map[k-1][i] = temp;
+                                map[j][i] = 0;
+                                break;
+                            }
+                            else if(map[k][i] != 0 && map[k][i] != map[j][i]){
+                                int temp = map[j][i];
+                                map[j][i] = 0;
+                                map[k-1][i] = temp;
+                                break;
+                            }
+                            else if(k == n-1 && map[k][i] == 0){
+                                map[k][i] = map[j][i];
+                                map[j][i] = 0;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
-
-        return map;
-    }
-
-    //아래로 합칠 경우
-    static int[][] sumDown(int[][] map){
-        boolean[][] visit = new boolean[n][n];
-
-        for(int i = 0; i < n; i++){
-            for(int j = n-1; j >= 0; j--){
-                if(map[j][i] != 0){
-                    for(int k = j+1; k < n; k++){
-                        if(map[k][i] != 0 && !visit[k][i] && map[k][i] == map[j][i]){
+        // 위
+        else if(d == 1){
+            for(int i = 0; i < n; i++){
+                for(int j = 0; j < n; j++){
+                    if(map[j][i] != 0){
+                        for(int k = j-1; k >= 0; k--){
+                            if(map[k][i] != 0 && !visit[k][i] && map[k][i] == map[j][i]){
 //                            System.out.println(1);
-                            map[k][i] = map[k][i] * 2;
-                            map[j][i] = 0;
-                            visit[k][i] = true;
-                            break;
-                        }
-                        else if(map[k][i] != 0 && visit[k][i]) {
+                                map[k][i] = map[k][i] * 2;
+                                map[j][i] = 0;
+                                visit[k][i] = true;
+                                break;
+                            }
+                            else if(map[k][i] != 0 && visit[k][i]) {
 //                            System.out.println(2);
-                            int temp = map[j][i];
-                            map[k-1][i] = temp;
-                            map[j][i] = 0;
-                            break;
-                        }
-                        else if(map[k][i] != 0 && map[k][i] != map[j][i]){
+                                int temp = map[j][i];
+                                map[k+1][i] = temp;
+                                map[j][i] = 0;
+                                break;
+                            }
+                            else if(map[k][i] != 0 && map[k][i] != map[j][i]){
 //                            System.out.println(3);
-                            int temp = map[j][i];
-                            map[j][i] = 0;
-                            map[k-1][i] = temp;
-                            break;
-                        }
-                        else if(k == n-1 && map[k][i] == 0){
+                                int temp = map[j][i];
+                                map[j][i] = 0;
+                                map[k+1][i] = temp;
+                                break;
+                            }
+                            else if(k == 0 && map[k][i] == 0){
 //                            System.out.println(4);
-                            map[k][i] = map[j][i];
-                            map[j][i] = 0;
-                            break;
+                                map[k][i] = map[j][i];
+                                map[j][i] = 0;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
-
-        return map;
-    }
-
-    //왼쪽으로 합칠 경우
-    static int[][] sumLeft(int[][] map){
-        boolean[][] visit = new boolean[n][n];
-
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < n; j++){
-                if(map[i][j] != 0){
-                    for(int k = j-1; k >= 0; k--){
-                        if(map[i][k] != 0 && !visit[i][k] && map[i][k] == map[i][j]){
+        // 오른쪽
+        else if(d == 2){
+            for(int i = 0; i < n; i++){
+                for(int j = n-1; j >= 0; j--){
+                    if(map[i][j] != 0){
+                        for(int k = j+1; k < n; k++){
+                            if(map[i][k] != 0 && !visit[i][k] && map[i][k] == map[i][j]){
 //                            System.out.println(1);
-                            map[i][k] = map[i][k] * 2;
-                            map[i][j] = 0;
-                            visit[i][k] = true;
-                            break;
-                        }
-                        else if(map[i][k] != 0 && visit[i][k]) {
+                                map[i][k] = map[i][k] * 2;
+                                map[i][j] = 0;
+                                visit[i][k] = true;
+                                break;
+                            }
+                            else if(map[i][k] != 0 && visit[i][k]) {
 //                            System.out.println(2);
-                            int temp = map[i][j];
-                            map[i][k+1] = temp;
-                            map[i][j] = 0;
-                            break;
-                        }
-                        else if(map[i][k] != 0 && map[i][k] != map[i][j]){
+                                int temp = map[i][j];
+                                map[i][k-1] = temp;
+                                map[i][j] = 0;
+                                break;
+                            }
+                            else if(map[i][k] != 0 && map[i][k] != map[i][j]){
 //                            System.out.println(3);
-                            int temp = map[i][j];
-                            map[i][j] = 0;
-                            map[i][k+1] = temp;
-                            break;
-                        }
-                        else if(k == 0 && map[i][k] == 0){
+                                int temp = map[i][j];
+                                map[i][j] = 0;
+                                map[i][k-1] = temp;
+                                break;
+                            }
+                            else if(k == n-1 && map[i][k] == 0){
 //                            System.out.println(4);
-                            map[i][k] = map[i][j];
-                            map[i][j] = 0;
-                            break;
+                                map[i][k] = map[i][j];
+                                map[i][j] = 0;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
-
-        return map;
-    }
-
-    //오른쪽으로 합칠 경우
-    static int[][] sumRight(int[][] map){
-        boolean[][] visit = new boolean[n][n];
-
-        for(int i = 0; i < n; i++){
-            for(int j = n-1; j >= 0; j--){
-                if(map[i][j] != 0){
-                    for(int k = j+1; k < n; k++){
-                        if(map[i][k] != 0 && !visit[i][k] && map[i][k] == map[i][j]){
+        // 왼쪽
+        else{
+            for(int i = 0; i < n; i++){
+                for(int j = 0; j < n; j++){
+                    if(map[i][j] != 0){
+                        for(int k = j-1; k >= 0; k--){
+                            if(map[i][k] != 0 && !visit[i][k] && map[i][k] == map[i][j]){
 //                            System.out.println(1);
-                            map[i][k] = map[i][k] * 2;
-                            map[i][j] = 0;
-                            visit[i][k] = true;
-                            break;
-                        }
-                        else if(map[i][k] != 0 && visit[i][k]) {
+                                map[i][k] = map[i][k] * 2;
+                                map[i][j] = 0;
+                                visit[i][k] = true;
+                                break;
+                            }
+                            else if(map[i][k] != 0 && visit[i][k]) {
 //                            System.out.println(2);
-                            int temp = map[i][j];
-                            map[i][k-1] = temp;
-                            map[i][j] = 0;
-                            break;
-                        }
-                        else if(map[i][k] != 0 && map[i][k] != map[i][j]){
+                                int temp = map[i][j];
+                                map[i][k+1] = temp;
+                                map[i][j] = 0;
+                                break;
+                            }
+                            else if(map[i][k] != 0 && map[i][k] != map[i][j]){
 //                            System.out.println(3);
-                            int temp = map[i][j];
-                            map[i][j] = 0;
-                            map[i][k-1] = temp;
-                            break;
-                        }
-                        else if(k == n-1 && map[i][k] == 0){
+                                int temp = map[i][j];
+                                map[i][j] = 0;
+                                map[i][k+1] = temp;
+                                break;
+                            }
+                            else if(k == 0 && map[i][k] == 0){
 //                            System.out.println(4);
-                            map[i][k] = map[i][j];
-                            map[i][j] = 0;
-                            break;
+                                map[i][k] = map[i][j];
+                                map[i][j] = 0;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
-
+        
         return map;
     }
 
-    static int findMax(int[][] copy){
-        int m = 0;
+    static void check(int[][] map){
         for(int i = 0; i < n; i++){
-            for(int j = 0; j < n; j++){
-//                System.out.print(copy[i][j] + " ");
-                m = Math.max(copy[i][j], m);
-            }
-//            System.out.println();
+            for(int j = 0; j < n; j++) max = Math.max(map[i][j], max);
         }
-
-        return m;
     }
 
 }
